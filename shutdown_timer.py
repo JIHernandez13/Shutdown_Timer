@@ -1,4 +1,4 @@
-"""."""
+"""Windows based timer to turn off computer"""
 
 import os
 import tkinter as tk
