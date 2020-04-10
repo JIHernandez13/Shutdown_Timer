@@ -49,6 +49,7 @@ class Application(tk.Frame):  # pylint: disable=too-many-ancestors
             if minutes == '':
                 minutes = 0
 
+            minutes = int(minutes)  # cast as str
             minutes += int(hrs)*60  # convert hrs to mins
             seconds = int(minutes)*60  # convert mins to seconds
 
