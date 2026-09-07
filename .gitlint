@@ -1,0 +1,22 @@
+# gitlint config — https://jorisroovers.com/gitlint/
+# Run manually:   uv run gitlint
+# Lint a range:   uv run gitlint --commits origin/master..HEAD
+# Enforced at commit time via .pre-commit-config.yaml (commit-msg hook).
+
+[general]
+# Python re.search semantics for regex rules (gitlint 0.19+ default;
+# setting it explicitly silences the deprecation warning).
+regex-style-search=true
+
+# Stay out of the way of machine-generated messages.
+ignore-merge-commits=true
+ignore-revert-commits=true
+ignore-fixup-commits=true
+ignore-squash-commits=true
+
+# The defaults already match this repo's history: imperative subject
+# <= 72 chars with no trailing punctuation, a blank line after the
+# subject, and body lines wrapped at 80.
+
+[title-must-not-contain-word]
+words=wip

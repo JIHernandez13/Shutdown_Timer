@@ -6,6 +6,7 @@ dependencies = []
 
 [dependency-groups]
 dev = [
+    "gitlint>=0.19.1",
     "pre-commit>=4.6.2",
     "pytest>=8.3",
     "ruff>=0.16.6",
@@ -14,6 +15,14 @@ dev = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+# gitlint-core needs `sh` only off-Windows (sys_platform != 'win32'), but its
+# sdist can't build on Windows (setup.py imports fcntl). Supplying the metadata
+# here lets uv resolve the universal lock from Windows without building it.
+[[tool.uv.dependency-metadata]]
+name = "sh"
+version = "1.14.3"
+requires-dist = []
 
 [tool.ruff]
 line-length = 88

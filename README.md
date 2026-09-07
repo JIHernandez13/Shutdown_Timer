@@ -56,24 +56,30 @@ replace it with your new one.
   misbehaving.
 - **`ttk` widgets** and bounded spinboxes for the hour/minute fields.
 - **Tooling:** [uv](https://docs.astral.sh/uv/) project setup, Ruff for
-  linting and formatting (enforced by a pre-commit hook), a pytest suite for
-  the time/argument logic, and GitHub Actions that run Ruff and the tests on
-  every pull request.
+  linting and formatting, [gitlint](https://jorisroovers.com/gitlint/) for
+  commit messages (both enforced by pre-commit hooks), a pytest suite for the
+  time/argument logic, and GitHub Actions that run Ruff, gitlint, and the
+  tests on every pull request.
 
 ## Development
 
 ```bash
 # one-time setup
 uv sync
-uv run pre-commit install
+uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
 
 # lint / format
 uv run ruff check .
 uv run ruff format .
 
+# commit-message lint
+uv run gitlint                              # lint the last commit
+uv run gitlint --commits origin/master..HEAD  # lint a branch
+
 # tests
 uv run pytest
 ```
 
-The pre-commit hook runs Ruff on every commit. CI (`.github/workflows/`) runs
-Ruff and pytest on pull requests.
+The pre-commit hook runs Ruff on every commit and gitlint on every commit
+message. CI (`.github/workflows/`) runs Ruff, gitlint, and pytest on pull
+requests.
