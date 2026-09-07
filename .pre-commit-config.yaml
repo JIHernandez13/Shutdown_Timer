@@ -1,4 +1,5 @@
-# Run: uv run pre-commit install   (once, to activate the git hook)
+# Run once, to activate the git hooks (ruff runs pre-commit, gitlint commit-msg):
+#   uv run pre-commit install --hook-type pre-commit --hook-type commit-msg
 # Manual full run: uv run pre-commit run --all-files
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -7,3 +8,8 @@ repos:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
+
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
