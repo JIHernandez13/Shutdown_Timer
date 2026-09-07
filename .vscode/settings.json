@@ -1,0 +1,14 @@
+{
+  // Use the ruff pinned in the project's .venv (matches the pre-commit hook and CI),
+  // not the version bundled with the extension.
+  "ruff.importStrategy": "fromEnvironment",
+
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  }
+}

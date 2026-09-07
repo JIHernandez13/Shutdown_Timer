@@ -1,95 +1,105 @@
-"""."""
+"""A small Tkinter GUI to schedule or cancel a Windows shutdown."""
 
-import os
+from __future__ import annotations
+
+import subprocess
+import sys
 import tkinter as tk
+from tkinter import messagebox
 
 
 class Application(tk.Frame):  # pylint: disable=too-many-ancestors
-    """."""
+    """Main application frame: two entry boxes plus start/cancel buttons."""
 
-    def __init__(self, master=None):
-        """."""
-        super().__init__(master=master)
+    def __init__(self, master: tk.Tk) -> None:
+        super().__init__(master)
         self.master = master
         self.master.title("Shutdown Timer")
-        # self.master.minsize(width=200, height=200)
-        self.pack()
-        self.create_widgets()
+        self.pack(padx=10, pady=10)
+        self._build_widgets()
 
-    def create_widgets(self):
-        """initialize objects in the frame"""
+    def _build_widgets(self) -> None:
+        """Create and lay out the widgets."""
+        tk.Label(self, text="Enter time").grid(row=0, column=0, columnspan=2)
 
-        self.label1 = tk.Label(self, text="enter time")
-        self.label1.pack(side="bottom")
+        tk.Label(self, text="Hours").grid(row=1, column=0)
+        tk.Label(self, text="Minutes").grid(row=1, column=1)
 
-        self.start_timer = tk.Button(
-            self, text="start timer", command=self.begin_shutdown)
-        # self.start_timer.event_add()
-        self.start_timer.pack(side="right")
+        self.hours = tk.Entry(self, width=6)
+        self.hours.grid(row=2, column=0, padx=4)
 
-        self.quit = tk.Button(self, text="cancel",
-                              command=self.cancel_shutdown)
-        self.quit.pack(side="right")
+        self.minutes = tk.Entry(self, width=6)
+        self.minutes.grid(row=2, column=1, padx=4)
 
-        # TODO: input grayed out temporary input to show user hh:mm in the boxes
-        self.hours = tk.Entry(self)
-        self.hours.pack(side="left")
+        tk.Button(self, text="Start timer", command=self.begin_shutdown).grid(
+            row=3, column=0, pady=(8, 0)
+        )
+        tk.Button(self, text="Cancel shutdown", command=self.cancel_shutdown).grid(
+            row=3, column=1, pady=(8, 0)
+        )
 
-        self.minutes = tk.Entry(self)
-        self.minutes.pack(side="right")
+    def interpret_time(self) -> int:
+        """Return the delay in seconds from the entry fields.
 
-    def interpret_time(self):
-        """ Get values in text boxes and return time in seconds """
+        Raises:
+            ValueError: if the input is non-numeric, negative, or under one minute.
+        """
+        hours = int(self.hours.get() or 0)
+        minutes = int(self.minutes.get() or 0)
+        if hours < 0 or minutes < 0:
+            raise ValueError("Time values must not be negative.")
+
+        total_seconds = (hours * 60 + minutes) * 60
+        if total_seconds < 60:
+            raise ValueError("Please enter at least one minute.")
+        return total_seconds
+
+    def begin_shutdown(self) -> None:
+        """Validate input, confirm, and schedule the shutdown."""
         try:
-            hrs = (self.hours.get())  # get input
-            minutes = (self.minutes.get())
+            delay = self.interpret_time()
+        except ValueError as exc:
+            messagebox.showerror("Invalid time", str(exc))
+            return
 
-            if hrs == '':
-                hrs = 0
-            if minutes == '':
-                minutes = 0
+        if not messagebox.askyesno("Confirm", f"Schedule shutdown in {delay} seconds?"):
+            return
 
-            minutes += int(hrs)*60  # convert hrs to mins
-            seconds = int(minutes)*60  # convert mins to seconds
-
-        except ValueError as input_error:
-            print(input_error)
-
-        return seconds
-
-    def begin_shutdown(self):
-        """ Start windows shutdown timer """
-        shutdown_time = self.interpret_time()
-        assert shutdown_time >= 60, "At least one minute pls!"
-
-        status = os.system(f'shutdown /s /t {shutdown_time}')
-
-        if status == 0:  # command successful
-            print(f"shutting down in {shutdown_time} seconds")
+        result = subprocess.run(
+            ["shutdown", "/s", "/t", str(delay)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode == 0:
+            messagebox.showinfo("Scheduled", f"Shutting down in {delay} seconds.")
+            self.master.destroy()
         else:
-            print(f'invalid time')
+            messagebox.showerror(
+                "Failed",
+                result.stderr.strip() or "Could not schedule shutdown.",
+            )
+
+    def cancel_shutdown(self) -> None:
+        """Abort any pending shutdown."""
+        result = subprocess.run(
+            ["shutdown", "/a"], capture_output=True, text=True, check=False
+        )
+        if result.returncode == 0:
+            messagebox.showinfo("Canceled", "Shutdown canceled.")
+        else:
+            messagebox.showwarning(
+                "Nothing to cancel", "No shutdown timer is currently active."
+            )
         self.master.destroy()
 
-    def cancel_shutdown(self):
-        """ Cancel windows shutdown timer """
-        status = os.system(f'shutdown -a')
 
-        if status == 0:  # command successful
-            print("shutdown canceled")
-        else:
-            print("no shutdown timer started!")
-        self.master.destroy()
-
-        return status
-
-
-def main():
-    """."""
+def main() -> int:
+    """Program entry point."""
     root = tk.Tk()
-    app = Application(master=root)
-    app.mainloop()
+    Application(master=root).mainloop()
     return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
