@@ -1,0 +1,9 @@
+# Run: uv run pre-commit install   (once, to activate the git hook)
+# Manual full run: uv run pre-commit run --all-files
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.6
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
